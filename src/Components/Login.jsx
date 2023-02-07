@@ -1,61 +1,81 @@
-import { v4 } from "uuid";
-import { useState } from "react";
 
+import { useState } from "react";
+import { supabase } from "../supabase.js";
+import toast, { Toaster } from "react-hot-toast";
+import "../Style/login.css";
+import Loader from "./Loader.jsx"
 
 
 export default function Login({ setAccLogin }) {
-  const [accID, setAccID] = useState(false);
-  const [accStatus, setAccStatus] = useState(false);
-  const handleSignup = () => {
-    setAccID(" " + v4());
-    setAccStatus(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true)
+
+    if (username.length < 1) {
+      
+    setLoading(false)
+      return toast.error("Please enter username")
+    }
+    else if (password.length < 1) {
+      
+    setLoading(false)
+      return toast.error("Please enter password")
+    }
+    
+    const { data } = await supabase.from('login-signup').select("username").eq("username", username);
+    console.log(data)
+
+
+
+    if (data.length > 0) {
+      
+    setLoading(false)
+      return toast.error("Username not available")
+    }
+    else if (data.length == 0 && password.length > 0 && username.length > 0) {
+      const { status } = await supabase.from('login-signup').insert({ username: username, password: password });
+      if (status == 201) {
+        toast.success("Account created succesfully")
+      }
+
+
+    }
+    setLoading(false)
   }
-  const handleLogin = () => {
-   setAccLogin(true);
+  const handleLogin = async () => {
+
   }
 
-  return (
-    <section className="h-screen">
-      <div className="px-6 h-full text-gray-800">
-        <div
-          className="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap h-full g-6">
-          <div
-            className="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0">
-            <img
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-              className="w-full"
-              alt="Sample image"
-            />
-          </div>
-          <div className="xl:ml-20 xl:w-5/12 lg:w-5/12 md:w-8/12 mb-12 md:mb-0">
-            <form className="-mt-10">
 
-              <div className="mb-6">
-                <input
-                  type="text"
-                  className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                  id="exampleFormControlInput2"
-                  placeholder="Enter your ID"
-                />
-              </div>
-              <div className="text-center lg:text-left">
-                <button onClick={handleLogin}
-                  type="button"
-                  className="ml-4 inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-                >
-                  Login
-                </button>
-                <button onClick={handleSignup}
-                  type="button"
-                  className="ml-4 inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-                >
-                  Signup
-                </button>
-              </div>
-            </form>
-          </div>
+  return (<>
+    <Toaster />
+    <div className="containerr">
+      <div className="main">
+        <input type="checkbox" id="chk" aria-hidden="true" />
+        <div className="signup">
+          <form>
+            <label htmlFor="chk" aria-hidden="true">Sign up</label>
+            <input value={username} onChange={e => setUsername(e.target.value)} type="text" name="txt" placeholder="User name" required />
+            <input value={password} onChange={e => setPassword(e.target.value)} type="password" name="pswd" placeholder="Password" required />
+            <button className='flex justify-center items-center' onClick={handleSignup}>
+              {loading == true ? <Loader /> : "Sign up"}
+            </button>
+          </form>
         </div>
-      </div>
-    </section>
-  )
+        <div className="login">
+          <form>
+            <label htmlFor="chk" aria-hidden="true">Login</label>
+            <input type="text" placeholder="Username" required />
+            <input type="password" name="pswd" placeholder="Password" required />
+            <button>Login</button>
+          </form>
+        </div>
+      </div></div></>
+  );
 }

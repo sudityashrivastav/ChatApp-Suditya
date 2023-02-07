@@ -1,0 +1,1 @@
+export const data = [{name:"Suditya", message: "Hello brother I am Suditya"},{name:"Suditya", message: "Hello brother I am Suditya"},{name:"Suditya", message: "Hello brother I am Suditya"},{name:"Suditya", message: "Hello brother I am Suditya"}]
